@@ -32,74 +32,44 @@ while(!feof($input_file)){
     # split each line by the ":" to set up for key:value pairs
     $game_number = explode(" ", explode(":", $raw_string)[0])[1]; # the key
     # create array of reveals for each game
-    $reveals_strings = explode(";", explode(": ", $raw_string)[1]);    
+    $reveals_strings = explode("; ", explode(": ", $raw_string)[1]);    
     # split the reveals into an array for comparison
-    foreach($reveals_strings as $raw_reveal){
-        $reveal = trim($raw_reveal);
+    foreach($reveals_strings as $reveal){
         #var_dump($reveal);
-        if(str_contains($reveal, ",")){
-            foreach(explode(", ", $reveal) as $pull){
-                switch(explode(" ", $pull)[1]){
-                    case "blue";
-                        if((int)explode(" ", $pull)[0] > $maxBlue){
-                            $reveal_possible = false;
-                        }
-                        if((int)explode(" ", $pull)[0] > $minBlue){
-                            $minBlue = (int)explode(" ", $pull)[0];
-                        }
-                        break;
-                    case "green";
-                        if((int)explode(" ", $pull)[0] > $maxGreen){
-                            $reveal_possible = false;
-                        }
-                        if((int)explode(" ", $pull)[0] > $minGreen){
-                            $minGreen = (int)explode(" ", $pull)[0];
-                        }
-                        break;
-                    case "red";
-                        if((int)explode(" ", $pull)[0] > $maxRed){
-                            $reveal_possible = false;
-                        }
-                        if((int)explode(" ", $pull)[0] > $minRed){
-                            $minRed = (int)explode(" ", $pull)[0];
-                        }
-                        break;
-                    default;
-                        echo "failed to find a color name string match for pull[1]: " . explode(" ", $pull)[1] . "\n";
-                        break;
-                }
-            }
-        } else {
-            switch(explode(" ", $pull)[1]){
+        foreach(explode(", ", $reveal) as $pull){
+            $cube_color = explode(" ", $pull)[1];
+            $cube_count = (int)explode(" ", $pull)[0];
+            switch(trim($cube_color)){
                 case "blue";
-                    if((int)explode(" ", $pull)[0] > $maxBlue){
+                    if($cube_count > $maxBlue){
                         $reveal_possible = false;
                     }
-                    if((int)explode(" ", $pull)[0] > $minBlue){
-                        $minBlue = (int)explode(" ", $pull)[0];
+                    if($cube_count > $minBlue){
+                        $minBlue = $cube_count;
                     }
                     break;
                 case "green";
-                    if((int)explode(" ", $pull)[0] > $maxGreen){
+                    if($cube_count > $maxGreen){
                         $reveal_possible = false;
                     }
-                    if((int)explode(" ", $pull)[0] > $minGreen){
-                        $minGreen = (int)explode(" ", $pull)[0];
+                    if($cube_count > $minGreen){
+                        $minGreen = $cube_count;
                     }
                     break;
                 case "red";
-                    if((int)explode(" ", $pull)[0] > $maxRed){
+                    if($cube_count > $maxRed){
                         $reveal_possible = false;
                     }
-                    if((int)explode(" ", $pull)[0] > $minRed){
-                        $minRed = (int)explode(" ", $pull)[0];
+                    if($cube_count > $minRed){
+                        $minRed = $cube_count;
                     }
                     break;
                 default;
-                    echo "failed to find a color name string match for pull[1]: " . explode(" ", $pull)[1] . "\n";
+                    echo "failed to find a color name string match for cube_color: " . $cube_color . "\n";
                     break;
             }
         }
+        
     }
     $gameDataset[] = array($game_number, $reveal_possible, $minBlue, $minGreen, $minRed);
 }
