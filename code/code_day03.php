@@ -32,7 +32,7 @@ while(!feof($input_file)){
 # close the input file
 fclose($input_file);
 
-$numeric_string_locations = []; #row_num, column_num, length
+$numeric_string_locations = []; #row_num, column_num, length, number_as_string
 $numeric_strings = []; #number, use/don't use
 # loop through dataset, to get locations of any special characters.
 for($y = 0; $y < $line_count; $y++){
@@ -51,7 +51,7 @@ for($y = 0; $y < $line_count; $y++){
                     $checking_for_more_numbers = false;
                 }
             }
-            $numeric_string_locations[] = array($y, $x, $number_length);
+            $numeric_string_locations[] = array($y, $x, $number_length, $number_string);
             $use_in_calculation = number_has_adjacent_special_character($dataset, $y, $x, $number_length, $line_count, $line_length);
             $numeric_strings[] = array((int)$number_string, $use_in_calculation);
             # the $x fixer that prevents double-reading a number
@@ -59,6 +59,19 @@ for($y = 0; $y < $line_count; $y++){
         }
     }
 }
+
+$asterisk_locations = []; #row_num, column_num
+$gear_ratios_sum = 0;
+for($y = 0; $y < $line_count; $y++){
+    for($x = 0; $x < $line_length; $x++){
+        $this_character = $dataset[$y][$x];
+        if($this_character == "*"){
+            $gear_ratio_calculation = check_gear_for_connections_and_calculate($dataset, $y, $x, $numeric_string_locations);
+            $gear_ratios_sum += $gear_ratio_calculation;
+        }
+    }
+}
+
 
 # output the results
 $sum_of_used_numbers = 0;
@@ -70,7 +83,8 @@ foreach($numeric_strings as $avalue){
         $sum_of_used_numbers += $found_number;
     }
 }
-echo "$sum_of_used_numbers\n";
+echo "Sum of used numbers: $sum_of_used_numbers\n";
+echo "Sum of calculated gear ratios: $gear_ratios_sum\n";
 
 function number_has_adjacent_special_character($dataset, $row, $column, $length, $line_count, $line_length){
     $use_number_in_calculation = false;
@@ -85,5 +99,27 @@ function number_has_adjacent_special_character($dataset, $row, $column, $length,
         }
     }
     return $use_number_in_calculation;
+}
+
+function check_gear_for_connections_and_calculate($dataset, $row, $column, $number_locations){
+    $calculated_value = 0;
+    $adjacent_numbers = [];
+    #echo "row: $row ; column: $column\n";
+    foreach($number_locations as $number_location){
+        $number_row = $number_location[0];
+        $number_column_start = $number_location[1];
+        $number_column_end = $number_location[1] + $number_location[2] - 1;
+        $number_value = $number_location[3];
+        #echo "number_row: $number_row ; number_column_start: $number_column_start ; number_column_end: $number_column_end\n";
+        if($number_row -1 <= $row && $row <= $number_row + 1 && $number_column_start -1 <= $column && $column <= $number_column_end + 1){
+            $adjacent_numbers[] = $number_value;
+        }
+    }
+    #echo "\n";
+    if(count($adjacent_numbers) == 2){
+        #var_dump($adjacent_numbers);
+        $calculated_value = $adjacent_numbers[0] * $adjacent_numbers[1];
+    }
+    return $calculated_value;
 }
 ?>  
